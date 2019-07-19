@@ -29,6 +29,14 @@ app.use(function authorizeUserToken(req, res, next){
 
 
 
+
+
+app.get('/', (req,res)=>{
+  res.send('hello, world!');
+});
+
+app.use(bookmarkRouter);
+
 app.use(function errorHandler(error, req, res, next){
   let response;
   if (NODE_ENV === 'production') {
@@ -40,10 +48,4 @@ app.use(function errorHandler(error, req, res, next){
   logger.error('Server error');
   res.status(500).json(response);
 });
-
-app.get('/', (req,res)=>{
-  res.send('hello, world!');
-});
-
-app.use(bookmarkRouter);
 module.exports = app;
