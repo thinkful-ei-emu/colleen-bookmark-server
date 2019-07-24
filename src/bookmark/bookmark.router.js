@@ -7,11 +7,15 @@ const { PORT } = require('../config');
 
 const bookmarkRouter = express.Router();
 const bodyParser = express.json();
+const BookmarkService = require('../bookmark-service');
 
 bookmarkRouter 
   .route('/bookmark')
   .get((req, res)=>{
-    res.json(bookmarks);
+    BookmarkService.getBookmarks(req.app.get('db'))
+      .then(bookmarks=>{
+        res.json(bookmarks);
+      });
   })
   .post(bodyParser, (req, res)=>{
   
@@ -57,14 +61,24 @@ bookmarkRouter
 bookmarkRouter
   .route('/bookmark/:id')
   .get((req, res)=>{
-    const { id } = req.params;
-    const bookmark = bookmarks.find(b => b.id === id);
+    BookmarkService.getById(
+      req.app.get('db'),
+      req.params.id
+    )
+      .then(bookmark => {
+        if(!bookmark){
+          logger.error(`Bookmark with id ${req.params.id} not found`);
+          return res.status(404).json({error: {message: 'Bookmark does not exist'}});
+        }
+        res.json({
+          id: bookmark.id,
+          rating: bookmark.rating,
+          title: bookmark.title,
+          description: bookmark.description,
+          url: bookmark.url,
+        });
+      });
 
-    if(!bookmark){
-      logger.error(`Bookmark with id ${id} not found`);
-      res.status(400).send('Bookmark not found');
-    }
-    res.json(bookmark);
   })
   .delete((req, res)=>{
     const { id } = req.params;

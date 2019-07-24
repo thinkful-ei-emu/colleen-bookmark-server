@@ -1,4 +1,4 @@
-function makeBookmarkList (){
+function makeBookmarksList (){
   return [
     {
       id: 1,
@@ -31,4 +31,4 @@ function makeBookmarkList (){
   ]
 }
 
-module.exports = { makeBookmarkList }
+module.exports = { makeBookmarksList };

@@ -10,3 +10,12 @@
 {"message":"Bookmark with id 1 not found","level":"error"}
 {"message":"Bookmark 1 deleted","level":"info"}
 {"message":"Bookmark 1 deleted","level":"info"}
+{"message":"Unauthorized request to path: / ","level":"error"}
+{"message":"Unauthorized request to path: / ","level":"error"}
+{"message":"Unauthorized request to path: / ","level":"error"}
+{"message":"Unauthorized request to path: / ","level":"error"}
+{"message":"Unauthorized request to path: /bookmark/2 ","level":"error"}
+{"message":"Bookmark with id 2 not found","level":"error"}
+{"message":"Bookmark with id 1 not found","level":"error"}
+{"message":"Bookmark with id 1 not found","level":"error"}
+{"message":"Bookmark with id 1 not found","level":"error"}
