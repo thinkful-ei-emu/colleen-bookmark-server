@@ -9,6 +9,14 @@ const BookmarkService = {
       .select('*')
       .where('id', id)
       .first();
+  },
+
+  addBookmark(knex, newBookmark){
+    return knex
+      .insert(newBookmark)
+      .into('bookmarks_list')
+      .returning('*')
+      .then(rows => rows[0]);
   }
 };
 

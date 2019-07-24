@@ -73,8 +73,35 @@ describe('Bookmark Endpoints', function() {
         return supertest(app)
           .get('/bookmark/1')
           .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
-          .expect(404, {error: { message: 'Bookmark does not exist'}});
+          .expect(404, { error: { message: 'Bookmark does not exist' } });
       });
+    });
+  });
+
+  describe.only('/POST bookmark', () => {
+    it('creates a bookmark, responding with 201 and the new bookmark', () => {
+      const newBookmark = {
+        title: 'new bookmark added',
+        url: 'www.thing.org',
+        rating: 2
+      };
+
+      return supertest(app)
+        .post('/bookmark')
+        .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+        .send(newBookmark)
+        .expect(201)
+        .expect(res => {
+          expect(res.body.bookmark).to.have.property('id');
+          expect(res.body.bookmark.title).to.eql(newBookmark.title);
+          expect(res.body.bookmark.url).to.eql(newBookmark.url);
+          expect(res.body.bookmark.rating).to.eql(newBookmark.rating);
+        })
+        .then(postRes => {
+          supertest(app)
+          .get(`/bookmark/${postRes.body.bookmark.id}`)
+          .expect(postRes.body.bookmark)
+        })
     });
   });
 });

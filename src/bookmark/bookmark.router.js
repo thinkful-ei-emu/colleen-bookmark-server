@@ -18,10 +18,16 @@ bookmarkRouter
       });
   })
   .post(bodyParser, (req, res)=>{
-  
     const { title, url, description, rating } = req.body;
+    const newArticle = { title, url, description, rating };
+    BookmarkService.addBookmark(req.app.get('db'), newArticle)
+      .then( bookmark => {
+        res
+          .status(201)
+          .json({bookmark});
+      });
 
-    if(!title){
+    /* if(!title){
       logger.error('Title is required');
       return res.status(400).send('Invalid data');
     }
@@ -38,24 +44,11 @@ bookmarkRouter
       return res.status(400).send('Invalid data');
     }
 
-    const id = uuid();
-    const bookmark = {
-      id,
-      title,
-      url,
-      description,
-      rating
-    };
-    //if passes conditionals, add to bookmarks store
-    bookmarks.push(bookmark);
 
     //logger message to show success
-    logger.info(`Bookmark with id ${id} created`);
+    logger.info(`Bookmark with id ${newArticle.id} created`);
 
-    res
-      .status(201)
-      .location(`http://localhost:${PORT}/${id}`)
-      .json({bookmark});
+       */
   });
 
 bookmarkRouter
