@@ -23,7 +23,7 @@
     },
     //ESLint rules: Severity Levels: off = 0 | warn = 1 | error = 2
     "rules": {
-        "strict": ["error", "safe"],   //prefer `'use-strict';` pragma
+        //"strict": ["error", "safe"],   //prefer `'use-strict';` pragma
         "eqeqeq":"error",              //prefer strict equality `===`
         "no-console": "warn",          //allows but warn about console like `console.log()`
         "no-unused-vars": "off",      //warns about unused variables

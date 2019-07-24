@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server",
     "predeploy": "npm audit",
+    "migrate": "postgrator --config postgrator-config.js",
     "deploy": "git push heroku master",
     "dev": "nodemon src/server",
     "debug": "ndb server",
@@ -20,7 +21,9 @@
     "eslint": "^6.0.1",
     "express": "^4.17.1",
     "helmet": "^3.19.0",
+    "knex": "^0.19.1",
     "morgan": "^1.9.1",
+    "pg": "^7.11.0",
     "uuid": "^3.3.2",
     "winston": "^3.2.1"
   },
@@ -28,9 +31,10 @@
     "chai": "^4.2.0",
     "mocha": "^6.1.4",
     "nodemon": "^1.19.1",
+    "postgrator-cli": "^3.1.0",
     "supertest": "^4.0.2"
   },
-  "engines":{
+  "engines": {
     "node": "12.0.0"
   }
 }
