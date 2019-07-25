@@ -52,7 +52,33 @@ describe('Bookmark Endpoints', function() {
     });
   });
 
-  describe('/GET /bookmark/:id', () => {
+  describe.only('/GET /bookmark/:id', () => {
+    context('Given an XSS attack', () => {
+      const maliciousBookmark = {
+        id: 911,
+        title: 'Naughty <script>alert("xss")</script>',
+        url:'www.badboy.com',
+        description: 'Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.',
+        rating: 1
+      };
+      beforeEach('insert malicious bookmark', ()=> {
+        return db
+        .into('bookmarks_list')
+        .insert([maliciousBookmark]);
+      });
+      it('removes XSS attack content', ()=>{
+        return supertest(app)
+        .get(`/bookmark/${maliciousBookmark.id}`)
+        .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+        .expect(200)
+        .expect(res=>{
+          // eslint-disable-next-line no-useless-escape
+          expect(res.body.title).to.equal('Naughty &lt;script&gt;alert(\"xss\")&lt;/script&gt;');
+          // eslint-disable-next-line quotes
+          expect(res.body.description).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
+        })
+      })
+    });
     context('Given there are articles in db', () => {
       const testList = makeBookmarksList();
       beforeEach('insert bookmarks', () => {
@@ -78,7 +104,7 @@ describe('Bookmark Endpoints', function() {
     });
   });
 
-  describe.only('/POST bookmark', () => {
+  describe('/POST bookmark', () => {
     it('creates a bookmark, responding with 201 and the new bookmark', () => {
       const newBookmark = {
         title: 'new bookmark added',
@@ -92,6 +118,9 @@ describe('Bookmark Endpoints', function() {
         .send(newBookmark)
         .expect(201)
         .expect(res => {
+          expect(res.headers.location).to.eql(
+            `/bookmark/${res.body.bookmark.id}`
+          );
           expect(res.body.bookmark).to.have.property('id');
           expect(res.body.bookmark.title).to.eql(newBookmark.title);
           expect(res.body.bookmark.url).to.eql(newBookmark.url);
@@ -99,9 +128,27 @@ describe('Bookmark Endpoints', function() {
         })
         .then(postRes => {
           supertest(app)
-          .get(`/bookmark/${postRes.body.bookmark.id}`)
-          .expect(postRes.body.bookmark)
-        })
+            .get(`/bookmark/${postRes.body.bookmark.id}`)
+            .expect(postRes.body.bookmark);
+        });
+    });
+    const requiredFields = ['title', 'url', 'rating'];
+    requiredFields.forEach(field => {
+      const newBookmark = {
+        title: 'Test bookmark',
+        url: 'www.pop.com',
+        rating: '3'
+      };
+      it(`responds with 400 and an error message when ${field} is missing`, () => {
+        delete newBookmark[field];
+        return supertest(app)
+          .post('/bookmark')
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          .send(newBookmark)
+          .expect(400, {
+            error: { message: `Missing '${field}' in request body` }
+          });
+      });
     });
   });
 });

@@ -40,7 +40,7 @@ app.use(function errorHandler(error, req, res, next){
 });
 
 app.get('/', (req,res)=>{
-  res.send('hello, world!')
+  res.send('hello, world!');
 });
 
 app.use(bookmarkRouter);
