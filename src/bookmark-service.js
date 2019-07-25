@@ -17,6 +17,13 @@ const BookmarkService = {
       .into('bookmarks_list')
       .returning('*')
       .then(rows => rows[0]);
+  },
+
+  deleteBookmark(knex, id){
+    return knex
+    .from('bookmarks_list')
+    .where({id})
+    .delete()
   }
 };
 

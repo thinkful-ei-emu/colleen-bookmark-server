@@ -52,7 +52,7 @@ describe('Bookmark Endpoints', function() {
     });
   });
 
-  describe.only('/GET /bookmark/:id', () => {
+  describe('/GET /bookmark/:id', () => {
     context('Given an XSS attack', () => {
       const maliciousBookmark = {
         id: 911,
@@ -75,9 +75,9 @@ describe('Bookmark Endpoints', function() {
           // eslint-disable-next-line no-useless-escape
           expect(res.body.title).to.equal('Naughty &lt;script&gt;alert(\"xss\")&lt;/script&gt;');
           // eslint-disable-next-line quotes
-          expect(res.body.description).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
-        })
-      })
+          expect(res.body.description).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`);
+        });
+      });
     });
     context('Given there are articles in db', () => {
       const testList = makeBookmarksList();
@@ -148,6 +148,39 @@ describe('Bookmark Endpoints', function() {
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
           });
+      });
+    });
+  });
+  describe('/DELETE bookmark/:id', ()=>{
+    context('Given there are bookmarks in the db',()=>{
+      const testItems = makeBookmarksList();
+      beforeEach('insert bookmarks', ()=>{
+        return db
+        .into('bookmarks_list')
+        .insert(testItems);
+      });
+      it('responds with a 204 and removes the bookmark', ()=>{
+        const idToRemove = 2;
+        const expectedItems = testItems.filter(item => item.id !== idToRemove);
+        return supertest(app)
+        .delete(`/bookmark/${idToRemove}`)
+        .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+        .expect(204)
+        .then(res=>{
+          supertest(app)
+          .get('/bookmark')
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          .expect(expectedItems);
+        });
+      });
+    });
+    context('Given no bookmarks in db', ()=>{
+      it('responds with 404', ()=>{
+        const nonexistentId=12345;
+        return supertest(app)
+        .delete(`/bookmark/${nonexistentId}`)
+        .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+        .expect(404, {error: {message: "Bookmark doesn't exist"}});
       });
     });
   });
