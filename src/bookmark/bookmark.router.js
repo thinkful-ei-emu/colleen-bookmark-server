@@ -2,9 +2,9 @@
 const express = require("express");
 //const uuid = require('uuid');
 const logger = require("../logger");
-const { bookmarks } = require("../store");
+//const { bookmarks } = require("../store");
 //const { PORT } = require('../config');
-
+const path = require('path');
 const bookmarkRouter = express.Router();
 const bodyParser = express.json();
 const BookmarkService = require("../bookmark-service");
@@ -18,12 +18,12 @@ bookmarkRouter
     });
   })
   .post(bodyParser, (req, res) => {
-    const { title, url, description, rating } = req.body;
+    const { title, url, description='', rating } = req.body;
     const newBookmark = { title, url, description, rating };
     const requiredInfo = { title, url, rating };
-
+    console.log('description:', description);
     for (const [key, value] of Object.entries(requiredInfo)) {
-      if (value === null) {
+      if (value == null) {
         return res
           .status(400)
           .json({ error: { message: `Missing '${key}' in request body` } });
@@ -34,7 +34,7 @@ bookmarkRouter
       bookmark => {
         res
           .status(201)
-          .location(`/bookmark/${bookmark.id}`)
+          .location(path.posix.join(req.originalUrl + `/${bookmark.id}`))
           .json({ bookmark });
       }
     );
@@ -74,12 +74,21 @@ bookmarkRouter
         res.status(204).end();
       }
     );
-
-    /*  if(bookmarkIndex === -1){
-      logger.error(`Bookmark with id ${req.params.id} not found`);
-      res.status(400).send('Bookmark not found');
-    } */
     logger.info(`Bookmark ${req.params.id} deleted`);
+  })
+  .patch(bodyParser, (req, res)=>{
+    const { title, url, rating, description } = req.body;
+    const bookmarkToUpdate = { title, url, rating, description };
+    const numOfValues = Object.values(bookmarkToUpdate).filter(Boolean).length;
+    if(numOfValues === 0){
+      return res.status(400).json({
+        error: {message: 'Request body must contain title, url, rating or description'}
+      });
+    }
+    BookmarkService.updateBookmark(req.app.get('db'), req.params.id, bookmarkToUpdate)
+      .then(()=>{
+        res.status(204).end();
+      });
   });
 
 module.exports = bookmarkRouter;

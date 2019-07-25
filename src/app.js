@@ -43,6 +43,6 @@ app.get('/', (req,res)=>{
   res.send('hello, world!');
 });
 
-app.use(bookmarkRouter);
+app.use('/api', bookmarkRouter);
 
 module.exports = app;
